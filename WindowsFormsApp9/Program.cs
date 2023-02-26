@@ -1,22 +1,28 @@
-﻿using System;
+﻿using Serilog;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace WindowsFormsApp9
+namespace WeldScanApp
 {
     internal static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
+        public static string ProductionLine = ConfigurationManager.AppSettings["Line"];
+
         [STAThread]
         static void Main()
         {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.File("weld-scan-log-.log", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new WeldScan());
         }
     }
 }
