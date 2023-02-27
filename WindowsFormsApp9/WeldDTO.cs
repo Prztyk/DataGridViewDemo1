@@ -8,6 +8,8 @@ namespace WeldScanApp
 {
     public class WeldDTO
     {
-        public string WeldNumber { get; set; }
+        public int PartId { get; set; }
+        public string WeldCode { get; set; }
+        public DateTime Date { get; set; }
     }
 }

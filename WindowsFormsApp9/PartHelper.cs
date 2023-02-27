@@ -8,21 +8,24 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using static System.Windows.Forms.LinkLabel;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+using Serilog;
 
 namespace WeldScanApp
 {
-    public class DatabaseHelper
+    public class PartHelper
     {
-        private static void Save(PartDTO p)
+        public static void SavePart(PartDTO part)
         {
 
             using (SqlDatabase db = new SqlDatabase())
             {
                 db.OpenTr();
 
-                if (p.Id == 0)
+                if (part.Id == 0)
                 {
                     #region row not saved in database - insert
+
+                    Log.Information($"Part insert [{part.PartCode}]");
 
                     string queryS_Insert =
                         "insert into dbo.SKAN_DETAL " +
@@ -33,8 +36,8 @@ namespace WeldScanApp
 
                     using (SqlCommand cmd = new SqlCommand(queryS_Insert, db.SqlCnn, db.Tr))
                     {
-                        cmd.Parameters.Add("@detal", SqlDbType.VarChar).Value = p.PartNumber;
-                        cmd.Parameters.Add("@linia", SqlDbType.VarChar).Value = Program.ProductionLine;
+                        cmd.Parameters.Add("@detal", SqlDbType.VarChar).Value = part.PartCode;
+                        cmd.Parameters.Add("@linia", SqlDbType.VarChar).Value = part.Line;
 
                         SqlParameter recordId = new SqlParameter("@Id", SqlDbType.Int);
                         recordId.Direction = ParameterDirection.Output;
@@ -43,7 +46,7 @@ namespace WeldScanApp
 
                         cmd.ExecuteNonQuery();
 
-                        p.Id = Convert.ToInt32(cmd.Parameters["@Id"].Value);
+                        part.Id = Convert.ToInt32(cmd.Parameters["@Id"].Value);
                     }
 
                     #endregion row not saved in database
@@ -52,16 +55,16 @@ namespace WeldScanApp
                 {
                     #region row saved in database - update
 
+                    Log.Information($"Part rqty udate [{part.PartCode}]");
+
                     string queryS_Update =
                         "update dbo.SKAN_DETAL " +
-                        "set decyzja = @decyzja " +
+                        "set rqty = rqty + 1 " +
                         "where id = @id";
 
                     using (SqlCommand cmd = new SqlCommand(queryS_Update, db.SqlCnn, db.Tr))
                     {
-                        cmd.Parameters.Add("@decyzja", SqlDbType.VarChar).Value = p.Result;
-
-                        cmd.Parameters.Add("@id", SqlDbType.Int).Value = p.Id;
+                        cmd.Parameters.Add("@id", SqlDbType.Int).Value = part.Id;
 
                         cmd.ExecuteNonQuery();
                     }
@@ -73,7 +76,33 @@ namespace WeldScanApp
             }
         }
 
-        public static PartDTO Get()
+        public static void UpdateResult(PartDTO part)
+        {
+            Log.Information($"Part status update [{part.PartCode}] [{part.Result}]");
+
+            using (SqlDatabase db = new SqlDatabase())
+            {
+                db.OpenTr();
+
+                string queryS_Update =
+                    "update dbo.SKAN_DETAL " +
+                    "set decyzja = @decyzja " +
+                    "where id = @id";
+
+                using (SqlCommand cmd = new SqlCommand(queryS_Update, db.SqlCnn, db.Tr))
+                {
+                    cmd.Parameters.Add("@decyzja", SqlDbType.VarChar).Value = part.Result;
+                    
+                    cmd.Parameters.Add("@id", SqlDbType.Int).Value = part.Id;
+
+                    cmd.ExecuteNonQuery();
+                }
+
+                db.CommitTr();
+            }
+        }
+
+        public static PartDTO GetPartByCode(string partCode)
         {
             using (SqlDatabase db = new SqlDatabase())
             {
@@ -81,19 +110,26 @@ namespace WeldScanApp
 
                 string queryS =
                     "select id, detal, decyzja, data_detal, linia " +
-                    "from dbo.SKAN_DETAL";
-                using (SqlCommand command = new SqlCommand(queryS, db.SqlCnn))
+                    "from dbo.SKAN_DETAL " +
+                    "where detal = @detal " +
+                    "and linia = @line";
+                using (SqlCommand cmd = new SqlCommand(queryS, db.SqlCnn))
                 {
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    cmd.Parameters.Add("@detal", SqlDbType.VarChar).Value = partCode;
+                    cmd.Parameters.Add("@line", SqlDbType.VarChar).Value = Program.ProductionLine;
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
                             PartDTO part = new PartDTO();
                             part.Id = reader.GetInt32(reader.GetOrdinal("id"));
-                            part.PartNumber = reader.GetString(reader.GetOrdinal("detal"));
+                            part.PartCode = reader.GetString(reader.GetOrdinal("detal"));
                             part.Result = reader.GetString(reader.GetOrdinal("decyzja"));
                             part.Date = reader.GetDateTime(reader.GetOrdinal("data_detal"));
                             part.Line = reader.GetString(reader.GetOrdinal("linia"));
+
+                            part.Welds = WeldHelper.GetWeldsByPartId(part.Id);
 
                             return part;
                         }

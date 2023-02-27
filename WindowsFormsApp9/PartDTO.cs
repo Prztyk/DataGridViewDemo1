@@ -9,15 +9,15 @@ namespace WeldScanApp
     public class PartDTO
     {
         public int Id { get; set; }
-        public string PartNumber { get; set; }
+        public string PartCode { get; set; }
         public string Result { get; set; }
         public DateTime Date { get; set; }
         public string Line { get; set; }
-        public List<WeldDTO> Welds { get; set; }
+        public List<string> Welds { get; set; }
 
         public PartDTO()
         {
-            Welds = new List<WeldDTO>();
+            Welds = new List<string>();
         }
     }
 }

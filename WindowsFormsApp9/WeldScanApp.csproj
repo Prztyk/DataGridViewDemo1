@@ -59,7 +59,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DatabaseHelper.cs" />
+    <Compile Include="WeldHelper.cs" />
+    <Compile Include="PartHelper.cs" />
     <Compile Include="PartDTO.cs" />
     <Compile Include="RandomHelper.cs" />
     <Compile Include="SqlDatabase.cs" />

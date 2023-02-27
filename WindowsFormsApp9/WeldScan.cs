@@ -3,23 +3,27 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WeldScanApp
 {
     public partial class WeldScan : Form
     {
+        private PartDTO currentPart;
+
         public WeldScan()
         {
             InitializeComponent();
             labelProductionLine.Text = Program.ProductionLine;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void WeldScan_Load(object sender, EventArgs e)
         {
             grid.Columns.Add("Column1", "Column1Header");
             grid.Columns.Add("Column2", "Column2Header");
@@ -41,9 +45,9 @@ namespace WeldScanApp
             grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             grid.MultiSelect = false;
 
-            grid.Rows.Clear();
-
             textBoxReceived.Focus();
+
+            ClearPartInfo();
 
 #if DEBUG
             labelComment.BorderStyle = BorderStyle.FixedSingle;
@@ -148,10 +152,10 @@ namespace WeldScanApp
             Log.Information("OK / NOK code recognized");
             if (ValidateOKCode(text) == false) { return; }
 
-            labelDate.Text = string.Empty;
-            labelTime.Text = string.Empty;
-            labelPartCode.Text = string.Empty;
-            grid.Rows.Clear();
+            currentPart.Result = text;
+            PartHelper.UpdateResult(currentPart);
+            ClearPartInfo();
+            currentPart = null;
         }
 
         private void HandleUnknownScan(string text)
@@ -164,8 +168,13 @@ namespace WeldScanApp
         {
             Log.Information("Weld code recognized");
             if (ValidateWeldCode(text) == false) { return; }
-            
-            grid.Rows.Insert(0, new object[] { $"Weld Repair {grid.Rows.Count + 1}", $"{textBoxBuffer.Text}" });
+
+            WeldDTO weld = new WeldDTO { PartId = currentPart.Id, WeldCode = text };
+            WeldHelper.SaveWeld(weld);
+
+            if(currentPart.Welds.Contains(weld.WeldCode)) { return; }
+            currentPart.Welds.Add(weld.WeldCode);
+            grid.Rows.Insert(0, new object[] { $"Weld Repair {grid.Rows.Count + 1}", $"{weld.WeldCode}" });
             grid.Rows[0].Selected = true;
         }
 
@@ -174,22 +183,54 @@ namespace WeldScanApp
 #if DEBUG
             var r = RandomHelper.Roll(1, 999);
             var newPart = $"{r:000}";
-            text = text.Replace("160", newPart);
+            //text = text.Replace("160", newPart);
 #endif
 
             Log.Information("Part code recognized");
             if(ValidatePartCode(text) == false) { return; }
 
-            labelDate.Text = DateTime.Now.ToString("dd-MM-yyyy");
-            labelTime.Text = DateTime.Now.ToString("hh:mm");
-            labelPartCode.Text = text;
+            currentPart = PartHelper.GetPartByCode(text);
+            if (currentPart == null) { currentPart = CreateNewPart(text); }
+            PartHelper.SavePart(currentPart);
+            DisplayPartInfo(currentPart);
+        }
+
+        private void DisplayPartInfo(PartDTO part)
+        {
+            labelDate.Text = part.Date.ToString("dd-MM-yyyy");
+            labelTime.Text = part.Date.ToString("hh:mm");
+            labelPartCode.Text = part.PartCode;
             grid.Rows.Clear();
+            foreach(var weld in part.Welds)
+            {
+                grid.Rows.Insert(0, new object[] { $"Weld Repair {grid.Rows.Count + 1}", $"{weld}" });
+            }
+        }
+
+        private void ClearPartInfo()
+        {
+            labelDate.Text = string.Empty;
+            labelTime.Text = string.Empty;
+            labelPartCode.Text = string.Empty;
+            grid.Rows.Clear();
+            labelComment.Text = "Scan part code";
+        }
+
+        private PartDTO CreateNewPart(string text)
+        {
+            return new PartDTO 
+            { 
+                Id = 0, 
+                PartCode = text, 
+                Date = DateTime.Now.Date, 
+                Line = Program.ProductionLine
+            };
         }
 
         #region Validators
         private bool ValidateOKCode(string text)
         {
-            if (labelPartCode.Text.Length == 0)
+            if (currentPart == null)
             {
                 Log.Information($"OK / NOK code scanned [{text}] while no part code is active");
                 labelComment.Text = $"Scan part code !";
@@ -199,13 +240,19 @@ namespace WeldScanApp
             return true;
         }
 
-        private bool ValidateWeldCode(string text)
+        private bool ValidateWeldCode(string weldCode)
         {
-            if (labelPartCode.Text.Length == 0)
+            if (currentPart == null)
             {
-                Log.Information($"Weld code scanned [{text}] while no part code is active");
+                Log.Information($"Weld code scanned [{weldCode}] while no part code is active");
                 labelComment.Text = $"Scan part code !";
                 return false;
+            }
+
+            if(currentPart.Welds.Contains(weldCode))
+            {
+                Log.Information($"Weld code repeated [{weldCode}]");
+                labelComment.Text = $"Weld code repeated !";
             }
 
             return true;
@@ -213,9 +260,9 @@ namespace WeldScanApp
 
         private bool ValidatePartCode(string text)
         {
-            if (labelPartCode.Text.Length > 0)
+            if (currentPart != null)
             {
-                Log.Information($"Part code scanned [{text}] while other part code is active [{labelPartCode.Text}]");
+                Log.Information($"Part code scanned [{text}] while other part code is active [{currentPart.PartCode}]");
                 labelComment.Text = $"Scan weld code or OK or NOK !";
                 return false;
             }

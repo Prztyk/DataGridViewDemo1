@@ -37,7 +37,6 @@
             this.labelDate = new System.Windows.Forms.Label();
             this.textBoxReceived = new System.Windows.Forms.TextBox();
             this.labelComment = new System.Windows.Forms.Label();
-            this.textBoxBuffer = new System.Windows.Forms.TextBox();
             this.labelProductionLine = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).BeginInit();
             this.SuspendLayout();
@@ -128,17 +127,6 @@
             this.labelComment.TabIndex = 9;
             this.labelComment.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // textBoxBuffer
-            // 
-            this.textBoxBuffer.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxBuffer.Location = new System.Drawing.Point(150, 456);
-            this.textBoxBuffer.Multiline = true;
-            this.textBoxBuffer.Name = "textBoxBuffer";
-            this.textBoxBuffer.Size = new System.Drawing.Size(500, 20);
-            this.textBoxBuffer.TabIndex = 10;
-            this.textBoxBuffer.Visible = false;
-            // 
             // labelProductionLine
             // 
             this.labelProductionLine.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -157,7 +145,6 @@
             this.ClientSize = new System.Drawing.Size(784, 561);
             this.Controls.Add(this.labelProductionLine);
             this.Controls.Add(this.labelComment);
-            this.Controls.Add(this.textBoxReceived);
             this.Controls.Add(this.labelDate);
             this.Controls.Add(this.labelTime);
             this.Controls.Add(this.label3);
@@ -165,7 +152,7 @@
             this.Controls.Add(this.labelPartCode);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.grid);
-            this.Controls.Add(this.textBoxBuffer);
+            this.Controls.Add(this.textBoxReceived);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MinimizeBox = false;
             this.Name = "WeldScan";
@@ -173,7 +160,7 @@
             this.Text = "Welds Scanner";
             this.Activated += new System.EventHandler(this.WeldScan_Activated);
             this.Deactivate += new System.EventHandler(this.WeldScan_Deactivate);
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Load += new System.EventHandler(this.WeldScan_Load);
             ((System.ComponentModel.ISupportInitialize)(this.grid)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -191,7 +178,6 @@
         private System.Windows.Forms.Label labelDate;
         private System.Windows.Forms.TextBox textBoxReceived;
         private System.Windows.Forms.Label labelComment;
-        private System.Windows.Forms.TextBox textBoxBuffer;
         private System.Windows.Forms.Label labelProductionLine;
     }
 }
