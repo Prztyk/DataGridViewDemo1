@@ -59,6 +59,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LogHelper .cs" />
+    <Compile Include="VersionHelper.cs" />
     <Compile Include="WeldHelper.cs" />
     <Compile Include="PartHelper.cs" />
     <Compile Include="PartDTO.cs" />

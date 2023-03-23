@@ -125,7 +125,7 @@ namespace WeldScanApp
                             PartDTO part = new PartDTO();
                             part.Id = reader.GetInt32(reader.GetOrdinal("id"));
                             part.PartCode = reader.GetString(reader.GetOrdinal("detal"));
-                            part.Result = reader.GetString(reader.GetOrdinal("decyzja"));
+                            part.Result = reader.IsDBNull(reader.GetOrdinal("decyzja")) ? string.Empty : reader.GetString(reader.GetOrdinal("decyzja"));
                             part.Date = reader.GetDateTime(reader.GetOrdinal("data_detal"));
                             part.Line = reader.GetString(reader.GetOrdinal("linia"));
 

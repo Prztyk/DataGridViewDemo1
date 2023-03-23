@@ -117,10 +117,11 @@ namespace WeldScanApp
         {
             try
             {
-                Log.Information($"Received text = [{text}]");
+                Log.Information($"[{VersionHelper.AppVersion()}] Received text = [{text}]");
+                LogHelper.SaveLog($"Received text = [{text}]");
+
                 labelComment.Text = string.Empty;
                 text = RemoveSpecialChars(text);
-
                 if(text.StartsWith("O1S") || text.StartsWith("0S"))
                 { HandlePartScan(text); }
                 else if (text.StartsWith("W"))
