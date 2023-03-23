@@ -121,9 +121,9 @@ namespace WeldScanApp
                 labelComment.Text = string.Empty;
                 text = RemoveSpecialChars(text);
 
-                if(text.StartsWith("O1S"))
+                if(text.StartsWith("O1S") || text.StartsWith("0S"))
                 { HandlePartScan(text); }
-                else if (text.StartsWith("W-"))
+                else if (text.StartsWith("W"))
                 { HandleWeldScan(text); }
                 else if (text == "OK" || text == "NOK")
                 { HandleOKScan(text); }
@@ -183,7 +183,7 @@ namespace WeldScanApp
 #if DEBUG
             var r = RandomHelper.Roll(1, 999);
             var newPart = $"{r:000}";
-            //text = text.Replace("160", newPart);
+            //text = text.Replace("210", newPart);
 #endif
 
             Log.Information("Part code recognized");
@@ -198,7 +198,7 @@ namespace WeldScanApp
         private void DisplayPartInfo(PartDTO part)
         {
             labelDate.Text = part.Date.ToString("dd-MM-yyyy");
-            labelTime.Text = part.Date.ToString("hh:mm");
+            labelTime.Text = part.Date.ToString("HH:mm");
             labelPartCode.Text = part.PartCode;
             grid.Rows.Clear();
             foreach(var weld in part.Welds)
@@ -222,7 +222,7 @@ namespace WeldScanApp
             { 
                 Id = 0, 
                 PartCode = text, 
-                Date = DateTime.Now.Date, 
+                Date = DateTime.Now, 
                 Line = Program.ProductionLine
             };
         }
