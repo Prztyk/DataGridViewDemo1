@@ -25,6 +25,8 @@ namespace WeldScanApp
 
         private void WeldScan_Load(object sender, EventArgs e)
         {
+            LogHelper.SaveLog($"Start app, version = {VersionHelper.AppVersion()}, line = {Program.ProductionLine}");
+
             grid.Columns.Add("Column1", "Column1Header");
             grid.Columns.Add("Column2", "Column2Header");
 
