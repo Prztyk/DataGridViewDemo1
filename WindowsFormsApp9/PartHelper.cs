@@ -9,11 +9,17 @@ using System.Xml.Linq;
 using static System.Windows.Forms.LinkLabel;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 using Serilog;
+using System.Security.Cryptography;
 
 namespace WeldScanApp
 {
     public class PartHelper
     {
+
+        private static List<string> notFixableWelds = new List<string>() { "W35", "W36", "W37", "W44.1", "W45.1", "W82", "W83", "W84", "W91.1", "W92.1", "W19", "W66", "W22", "W69", "W11.2", "W58.2", "W4", "W51",
+            "W44.2", "W45.2", "W91.2", "W92.2", "W11.3", "W58.3" };
+
+
         public static void SavePart(PartDTO part)
         {
 
@@ -89,6 +95,8 @@ namespace WeldScanApp
                     "set decyzja = @decyzja " +
                     "where id = @id";
 
+                if(IsPartNotFixable(part)) { part.Result = "NOK"; }
+
                 using (SqlCommand cmd = new SqlCommand(queryS_Update, db.SqlCnn, db.Tr))
                 {
                     cmd.Parameters.Add("@decyzja", SqlDbType.VarChar).Value = part.Result;
@@ -139,5 +147,20 @@ namespace WeldScanApp
 
             return null;
         }
+
+        public static bool IsPartNotFixable(PartDTO part)
+        {
+            foreach (var notFixableWeld in notFixableWelds)
+            {
+                if(part.Welds.Contains(notFixableWeld))
+                { return true; }
+            }
+            return false;
+        }
+        public static bool IsWeldNotFixable(string weld)
+        {
+            return notFixableWelds.Contains(weld);
+        }
+
     }
 }

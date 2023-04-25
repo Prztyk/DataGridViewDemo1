@@ -49,6 +49,11 @@ namespace WeldScanApp
 
             textBoxReceived.Focus();
 
+            label1.BorderStyle = label2.BorderStyle = label3.BorderStyle = BorderStyle.None;
+            labelDate.BorderStyle = labelTime.BorderStyle = labelPartCode.BorderStyle = BorderStyle.None;
+#if !DEBUG
+            textBoxReceived.Text = string.Empty;
+#endif
             ClearPartInfo();
 
 #if DEBUG
@@ -60,13 +65,15 @@ namespace WeldScanApp
 
         private void WeldScan_Activated(object sender, EventArgs e)
         {
-            this.BackColor = System.Drawing.SystemColors.Control;
+            //this.BackColor = System.Drawing.SystemColors.Control;
+            labelBackground.BackColor = Color.Green;
             textBoxReceived.Focus();
         }
 
         private void WeldScan_Deactivate(object sender, EventArgs e)
         {
-            this.BackColor = System.Drawing.Color.Firebrick;
+            //this.BackColor = System.Drawing.Color.Firebrick;
+            labelBackground.BackColor = Color.Firebrick;
         }
 
         #endregion Form Events
@@ -76,6 +83,16 @@ namespace WeldScanApp
         private void grid_Enter(object sender, EventArgs e)
         {
             textBoxReceived.Focus();
+        }
+
+        private void grid_RowPrePaint(object sender, DataGridViewRowPrePaintEventArgs e)
+        {
+            string weld = grid.Rows[e.RowIndex].Cells[1].Value.ToString();
+            if (PartHelper.IsWeldNotFixable(weld))
+            {
+                grid.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.Red;
+            }
+
         }
 
         #endregion Grid Events
@@ -274,5 +291,10 @@ namespace WeldScanApp
         }
 
         #endregion Validators
+
+        private void grid_SelectionChanged(object sender, EventArgs e)
+        {
+            grid.ClearSelection();
+        }
     }
 }
