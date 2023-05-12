@@ -95,6 +95,11 @@ namespace WeldScanApp
 
         }
 
+        private void grid_SelectionChanged(object sender, EventArgs e)
+        {
+            grid.ClearSelection();
+        }
+
         #endregion Grid Events
 
         #region Text Box Received Events
@@ -291,10 +296,5 @@ namespace WeldScanApp
         }
 
         #endregion Validators
-
-        private void grid_SelectionChanged(object sender, EventArgs e)
-        {
-            grid.ClearSelection();
-        }
     }
 }

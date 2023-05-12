@@ -95,7 +95,8 @@ namespace WeldScanApp
                     "set decyzja = @decyzja " +
                     "where id = @id";
 
-                if(IsPartNotFixable(part)) { part.Result = "NOK"; }
+                // Removed as user should have last word part is fixable or not
+                //if(IsPartNotFixable(part)) { part.Result = "NOK"; }
 
                 using (SqlCommand cmd = new SqlCommand(queryS_Update, db.SqlCnn, db.Tr))
                 {
@@ -157,6 +158,7 @@ namespace WeldScanApp
             }
             return false;
         }
+
         public static bool IsWeldNotFixable(string weld)
         {
             return notFixableWelds.Contains(weld);
